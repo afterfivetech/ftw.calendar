@@ -4,6 +4,7 @@ from Products.Five import BrowserView
 from zope.component import ComponentLookupError
 from zope.component import getMultiAdapter
 from zope.component.hooks import getSite
+from Products.CMFPlone.interfaces import ISelectableConstrainTypes
 
 
 class CalendarConfigView(BrowserView):
@@ -33,5 +34,8 @@ class CalendarConfigView(BrowserView):
         except ComponentLookupError:
             return False
 
-        return eventCreator.getEventType() in \
-               self.context.getImmediatelyAddableTypes()
+        try:
+            adapted_context = ISelectableConstrainTypes(self.context)
+            return eventCreator.getEventType() in adapted_context.getImmediatelyAddableTypes()
+        except TypeError:
+            return False
